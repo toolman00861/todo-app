@@ -24,6 +24,7 @@ namespace TodoPomodoro.Models
         private DateTime _endTime;
         private int _completedPomodoros = 0;
         private int _pomodorosUntilLongBreak = 4;
+        private PomodoroState _stateBeforePause = PomodoroState.Ready;
 
         /// <summary>
         /// 工作时间长度（分钟）
@@ -170,6 +171,7 @@ namespace TodoPomodoro.Models
                 State == PomodoroState.ShortBreak || 
                 State == PomodoroState.LongBreak)
             {
+                _stateBeforePause = State;
                 _timer.Stop();
                 State = PomodoroState.Paused;
                 TimerTick?.Invoke(this, EventArgs.Empty);
@@ -183,8 +185,13 @@ namespace TodoPomodoro.Models
         {
             if (State == PomodoroState.Paused)
             {
+                // 重新计算结束时间
+                _endTime = DateTime.Now.AddSeconds(RemainingSeconds);
                 _timer.Start();
-                State = PomodoroState.WorkInProgress;
+                
+                // 恢复到暂停前的状态
+                State = _stateBeforePause;
+                
                 TimerTick?.Invoke(this, EventArgs.Empty);
             }
         }

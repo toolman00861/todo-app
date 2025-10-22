@@ -15,6 +15,7 @@ namespace TodoPomodoro.ViewModels
         private string _timeDisplay = "25:00";
         private string _stateDisplay = "准备就绪";
         private string _pomodoroCountDisplay = "0";
+        private PomodoroState _previousState = PomodoroState.Ready;
 
         /// <summary>
         /// 番茄钟计时器
@@ -61,9 +62,9 @@ namespace TodoPomodoro.ViewModels
         }
 
         /// <summary>
-        /// 是否可以开始工作
+        /// 是否可以开始
         /// </summary>
-        public bool CanStartWork => _timer.State == PomodoroState.Ready || _timer.State == PomodoroState.Paused;
+        public bool CanStart => _timer.State == PomodoroState.Ready;
 
         /// <summary>
         /// 是否可以暂停
@@ -83,19 +84,14 @@ namespace TodoPomodoro.ViewModels
         public bool CanReset => _timer.State != PomodoroState.Ready;
 
         /// <summary>
-        /// 开始工作命令
+        /// 开始命令
         /// </summary>
-        public ICommand StartWorkCommand { get; }
+        public ICommand StartCommand { get; }
 
         /// <summary>
         /// 暂停命令
         /// </summary>
         public ICommand PauseCommand { get; }
-
-        /// <summary>
-        /// 恢复命令
-        /// </summary>
-        public ICommand ResumeCommand { get; }
 
         /// <summary>
         /// 重置命令
@@ -112,9 +108,8 @@ namespace TodoPomodoro.ViewModels
             _timer.PomodoroCompleted += Timer_PomodoroCompleted;
             _timer.BreakCompleted += Timer_BreakCompleted;
 
-            StartWorkCommand = new RelayCommand(_ => StartWork(), _ => CanStartWork);
+            StartCommand = new RelayCommand(_ => Start(), _ => CanStart);
             PauseCommand = new RelayCommand(_ => Pause(), _ => CanPause);
-            ResumeCommand = new RelayCommand(_ => Resume(), _ => CanResume);
             ResetCommand = new RelayCommand(_ => Reset(), _ => CanReset);
 
             UpdateTimeDisplay();
@@ -148,9 +143,8 @@ namespace TodoPomodoro.ViewModels
 
         private void UpdateCommandsCanExecute()
         {
-            OnPropertyChanged(nameof(CanStartWork));
+            OnPropertyChanged(nameof(CanStart));
             OnPropertyChanged(nameof(CanPause));
-            OnPropertyChanged(nameof(CanResume));
             OnPropertyChanged(nameof(CanReset));
         }
 
@@ -174,17 +168,32 @@ namespace TodoPomodoro.ViewModels
 
         private void UpdateTimeDisplay()
         {
-            int minutes = _timer.RemainingSeconds / 60;
-            int seconds = _timer.RemainingSeconds % 60;
-            TimeDisplay = $"{minutes:D2}:{seconds:D2}";
+            if (_timer.State == PomodoroState.Ready)
+            {
+                // 显示默认工作时间
+                TimeDisplay = $"{_timer.WorkDuration:D2}:00";
+            }
+            else
+            {
+                int minutes = _timer.RemainingSeconds / 60;
+                int seconds = _timer.RemainingSeconds % 60;
+                TimeDisplay = $"{minutes:D2}:{seconds:D2}";
+            }
         }
 
         /// <summary>
-        /// 开始工作
+        /// 开始
         /// </summary>
-        public void StartWork()
+        public void Start()
         {
-            _timer.StartWork();
+            if (_timer.State == PomodoroState.Ready)
+            {
+                _timer.StartWork();
+            }
+            else if (_timer.State == PomodoroState.Paused)
+            {
+                Resume();
+            }
         }
 
         /// <summary>
@@ -192,6 +201,7 @@ namespace TodoPomodoro.ViewModels
         /// </summary>
         public void Pause()
         {
+            _previousState = _timer.State;
             _timer.Pause();
         }
 
@@ -200,7 +210,10 @@ namespace TodoPomodoro.ViewModels
         /// </summary>
         public void Resume()
         {
-            _timer.Resume();
+            if (_timer.State == PomodoroState.Paused)
+            {
+                _timer.Resume();
+            }
         }
 
         /// <summary>
