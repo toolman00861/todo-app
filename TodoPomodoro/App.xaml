@@ -1,0 +1,32 @@
+<Application x:Class="TodoPomodoro.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:TodoPomodoro"
+             xmlns:converters="clr-namespace:TodoPomodoro.Converters"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- 应用图标资源 -->
+                <ResourceDictionary Source="Resources/AppIcon.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            
+            <!-- 转换器 -->
+            <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+            <converters:PriorityToColorConverter x:Key="PriorityToColorConverter"/>
+            
+            <!-- 全局样式 -->
+            <Style TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Microsoft YaHei UI"/>
+            </Style>
+            
+            <Style TargetType="Button">
+                <Setter Property="FontFamily" Value="Microsoft YaHei UI"/>
+            </Style>
+            
+            <Style TargetType="TextBox">
+                <Setter Property="FontFamily" Value="Microsoft YaHei UI"/>
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

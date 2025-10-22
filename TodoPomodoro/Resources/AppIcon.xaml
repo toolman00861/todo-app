@@ -1,0 +1,121 @@
+<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <!-- 应用程序图标 -->
+    <DrawingImage x:Key="AppIcon">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Children>
+                    <!-- 背景圆形 -->
+                    <GeometryDrawing Brush="#2196F3">
+                        <GeometryDrawing.Geometry>
+                            <EllipseGeometry Center="50,50" RadiusX="50" RadiusY="50"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    
+                    <!-- 待办事项清单 -->
+                    <GeometryDrawing Brush="White">
+                        <GeometryDrawing.Geometry>
+                            <PathGeometry Figures="M30,25 L70,25 L70,75 L30,75 Z" FillRule="Nonzero"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    
+                    <!-- 清单线条 -->
+                    <GeometryDrawing Brush="#2196F3">
+                        <GeometryDrawing.Geometry>
+                            <PathGeometry Figures="M35,35 L65,35 M35,45 L65,45 M35,55 L65,55 M35,65 L50,65" FillRule="Nonzero"/>
+                        </GeometryDrawing.Geometry>
+                        <GeometryDrawing.Pen>
+                            <Pen Brush="#2196F3" Thickness="3" StartLineCap="Round" EndLineCap="Round"/>
+                        </GeometryDrawing.Pen>
+                    </GeometryDrawing>
+                    
+                    <!-- 番茄 -->
+                    <GeometryDrawing Brush="#F44336">
+                        <GeometryDrawing.Geometry>
+                            <EllipseGeometry Center="70,70" RadiusX="15" RadiusY="15"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    
+                    <!-- 番茄叶子 -->
+                    <GeometryDrawing Brush="#4CAF50">
+                        <GeometryDrawing.Geometry>
+                            <PathGeometry Figures="M70,55 C75,50 80,53 75,58 L70,60 Z" FillRule="Nonzero"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+    
+    <!-- 任务图标 -->
+    <DrawingImage x:Key="TaskIcon">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Children>
+                    <!-- 背景 -->
+                    <GeometryDrawing Brush="#E3F2FD">
+                        <GeometryDrawing.Geometry>
+                            <RectangleGeometry Rect="0,0,100,100" RadiusX="10" RadiusY="10"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    
+                    <!-- 清单 -->
+                    <GeometryDrawing Brush="#1976D2">
+                        <GeometryDrawing.Geometry>
+                            <PathGeometry Figures="M30,20 L70,20 L70,80 L30,80 Z" FillRule="Nonzero"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    
+                    <!-- 清单内容 -->
+                    <GeometryDrawing Brush="White">
+                        <GeometryDrawing.Geometry>
+                            <PathGeometry Figures="M35,30 L65,30 M35,40 L65,40 M35,50 L65,50 M35,60 L65,60 M35,70 L50,70" FillRule="Nonzero"/>
+                        </GeometryDrawing.Geometry>
+                        <GeometryDrawing.Pen>
+                            <Pen Brush="White" Thickness="2" StartLineCap="Round" EndLineCap="Round"/>
+                        </GeometryDrawing.Pen>
+                    </GeometryDrawing>
+                </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+    
+    <!-- 番茄钟图标 -->
+    <DrawingImage x:Key="PomodoroIcon">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Children>
+                    <!-- 背景 -->
+                    <GeometryDrawing Brush="#FFEBEE">
+                        <GeometryDrawing.Geometry>
+                            <RectangleGeometry Rect="0,0,100,100" RadiusX="10" RadiusY="10"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    
+                    <!-- 番茄 -->
+                    <GeometryDrawing Brush="#F44336">
+                        <GeometryDrawing.Geometry>
+                            <EllipseGeometry Center="50,55" RadiusX="30" RadiusY="30"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    
+                    <!-- 番茄高光 -->
+                    <GeometryDrawing Brush="#FFCDD2">
+                        <GeometryDrawing.Geometry>
+                            <EllipseGeometry Center="40,45" RadiusX="8" RadiusY="8"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    
+                    <!-- 番茄叶子 -->
+                    <GeometryDrawing Brush="#4CAF50">
+                        <GeometryDrawing.Geometry>
+                            <PathGeometry Figures="M50,25 C60,15 70,20 65,30 L50,35 Z" FillRule="Nonzero"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+</ResourceDictionary>

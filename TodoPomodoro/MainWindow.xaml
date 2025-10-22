@@ -1,0 +1,520 @@
+<Window x:Class="TodoPomodoro.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TodoPomodoro"
+        xmlns:viewmodels="clr-namespace:TodoPomodoro.ViewModels"
+        mc:Ignorable="d"
+        Title="待办事项 + 番茄钟" Height="650" Width="1000"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent"
+        AllowsTransparency="True"
+        WindowStyle="None"
+        ResizeMode="CanResizeWithGrip">
+    
+    <Window.Resources>
+        <!-- 阴影效果 -->
+        <DropShadowEffect x:Key="StandardShadow" 
+                          Direction="270" 
+                          BlurRadius="10" 
+                          ShadowDepth="3" 
+                          Opacity="0.3" 
+                          Color="#000000"/>
+        
+        <!-- 圆角按钮样式 -->
+        <Style x:Key="RoundButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#4CAF50"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="ShadowBorder" 
+                                    Background="Transparent" 
+                                    CornerRadius="20" 
+                                    Margin="0,0,0,0">
+                                <Border.Effect>
+                                    <DropShadowEffect Direction="270" 
+                                                      BlurRadius="5" 
+                                                      ShadowDepth="2" 
+                                                      Opacity="0.3" 
+                                                      Color="#000000"/>
+                                </Border.Effect>
+                            </Border>
+                            <Border x:Name="MainBorder" 
+                                    Background="{TemplateBinding Background}" 
+                                    CornerRadius="20" 
+                                    BorderThickness="0">
+                                <ContentPresenter HorizontalAlignment="Center" 
+                                                  VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#66BB6A" TargetName="MainBorder"/>
+                                <Setter Property="RenderTransform" TargetName="MainBorder">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="1.05" ScaleY="1.05"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="RenderTransformOrigin" TargetName="MainBorder" Value="0.5,0.5"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#388E3C" TargetName="MainBorder"/>
+                                <Setter Property="RenderTransform" TargetName="MainBorder">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.95" ScaleY="0.95"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#CCCCCC" TargetName="MainBorder"/>
+                                <Setter Property="Opacity" Value="0.7" TargetName="MainBorder"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!-- 番茄钟按钮样式 -->
+        <Style x:Key="PomodoroButtonStyle" TargetType="Button" BasedOn="{StaticResource RoundButtonStyle}">
+            <Setter Property="Width" Value="110"/>
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        
+        <!-- 待办事项样式 -->
+        <Style x:Key="TodoItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="Margin" Value="0,4"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Grid>
+                            <Border x:Name="ShadowBorder" 
+                                    Background="Transparent" 
+                                    CornerRadius="8" 
+                                    Margin="0,0,0,0">
+                                <Border.Effect>
+                                    <DropShadowEffect Direction="270" 
+                                                      BlurRadius="4" 
+                                                      ShadowDepth="1" 
+                                                      Opacity="0.2" 
+                                                      Color="#000000"/>
+                                </Border.Effect>
+                            </Border>
+                            <Border x:Name="MainBorder" 
+                                    Background="{TemplateBinding Background}" 
+                                    CornerRadius="8" 
+                                    BorderThickness="0">
+                                <ContentPresenter Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#E3F2FD" TargetName="MainBorder"/>
+                                <Setter Property="BorderThickness" Value="0" TargetName="MainBorder"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#F5F5F5" TargetName="MainBorder"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    
+    <Border CornerRadius="15" Background="White" Margin="10" Effect="{StaticResource StandardShadow}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- 标题栏 -->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- 应用标题 -->
+                <Border Grid.Column="0" Background="#2196F3" CornerRadius="15,15,0,0" Padding="20,15">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="{StaticResource AppIcon}" Width="32" Height="32" Margin="0,0,10,0"/>
+                        <TextBlock Text="待办事项 + 番茄钟" 
+                                   FontSize="22" 
+                                   FontWeight="Bold" 
+                                   Foreground="White"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- 窗口控制按钮 -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Background="#2196F3">
+                    <Button x:Name="MinimizeButton" 
+                            Content="—" 
+                            Width="46" 
+                            Height="46" 
+                            Background="Transparent" 
+                            BorderThickness="0" 
+                            Foreground="White" 
+                            FontWeight="Bold" 
+                            Click="MinimizeButton_Click"/>
+                    
+                    <Button x:Name="CloseButton" 
+                            Content="✕" 
+                            Width="46" 
+                            Height="46" 
+                            Background="Transparent" 
+                            BorderThickness="0" 
+                            Foreground="White" 
+                            FontWeight="Bold" 
+                            Click="CloseButton_Click"/>
+                </StackPanel>
+            </Grid>
+            
+            <!-- 主内容区 -->
+            <Grid Grid.Row="1" Margin="15,10,15,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- 待办事项区域 -->
+                <Border Grid.Column="0" 
+                        Background="#FAFAFA" 
+                        CornerRadius="12" 
+                        Effect="{StaticResource StandardShadow}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <!-- 待办事项标题 -->
+                        <Border Background="#E3F2FD" 
+                                CornerRadius="12,12,0,0" 
+                                Padding="15" 
+                                BorderThickness="0">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{StaticResource TaskIcon}" Width="24" Height="24" Margin="0,0,10,0"/>
+                                <TextBlock Text="待办事项" 
+                                           FontSize="18" 
+                                           FontWeight="SemiBold" 
+                                           Foreground="#1976D2"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- 待办事项列表 -->
+                        <ListBox x:Name="TodoListBox"
+                                 Grid.Row="1" 
+                                 ItemsSource="{Binding TodoViewModel.TodoItems}" 
+                                 SelectedItem="{Binding TodoViewModel.SelectedTodoItem}" 
+                                 ItemContainerStyle="{StaticResource TodoItemStyle}"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 Margin="10,10,10,0"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <!-- 完成状态复选框 -->
+                                        <CheckBox Grid.Column="0" 
+                                                  IsChecked="{Binding IsCompleted}" 
+                                                  VerticalAlignment="Center" 
+                                                  Margin="0,0,12,0">
+                                            <CheckBox.Template>
+                                                <ControlTemplate TargetType="CheckBox">
+                                                    <Grid>
+                                                        <Border x:Name="Border" 
+                                                                Width="24" 
+                                                                Height="24" 
+                                                                CornerRadius="12" 
+                                                                Background="White" 
+                                                                BorderThickness="2" 
+                                                                BorderBrush="#BBDEFB">
+                                                            <Path x:Name="Checkmark" 
+                                                                  Stroke="White" 
+                                                                  StrokeThickness="2" 
+                                                                  Data="M 6,12 L 10,16 L 18,8" 
+                                                                  Visibility="Collapsed"/>
+                                                        </Border>
+                                                    </Grid>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsChecked" Value="True">
+                                                            <Setter Property="Background" Value="#4CAF50" TargetName="Border"/>
+                                                            <Setter Property="BorderBrush" Value="#4CAF50" TargetName="Border"/>
+                                                            <Setter Property="Visibility" Value="Visible" TargetName="Checkmark"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="BorderBrush" Value="#2196F3" TargetName="Border"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </CheckBox.Template>
+                                        </CheckBox>
+                                        
+                                        <!-- 待办事项内容 -->
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="{Binding Title}" 
+                                                       FontWeight="SemiBold" 
+                                                       FontSize="14"
+                                                       TextWrapping="Wrap">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                                                <Setter Property="TextDecorations" Value="Strikethrough"/>
+                                                                <Setter Property="Foreground" Value="#9E9E9E"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            
+                                            <TextBlock Text="{Binding Description}" 
+                                                       Foreground="#757575" 
+                                                       TextWrapping="Wrap" 
+                                                       Margin="0,5,0,0"
+                                                       Visibility="{Binding Description, Converter={StaticResource StringToVisibilityConverter}}"/>
+                                            
+                                            <StackPanel Orientation="Horizontal" 
+                                                        Margin="0,8,0,0">
+                                                <Border Background="#F5F5F5" 
+                                                        CornerRadius="4" 
+                                                        Padding="6,2">
+                                                    <TextBlock Text="{Binding CreatedAt, StringFormat='{}{0:yyyy-MM-dd}'}" 
+                                                               Foreground="#757575" 
+                                                               FontSize="11"/>
+                                                </Border>
+                                                
+                                                <Border Background="{Binding Priority, Converter={StaticResource PriorityToColorConverter}}" 
+                                                        CornerRadius="4" 
+                                                        Padding="6,2" 
+                                                        Margin="8,0,0,0">
+                                                    <TextBlock Text="{Binding Priority}" 
+                                                               Foreground="White" 
+                                                               FontSize="11"/>
+                                                </Border>
+                                                
+                                                <Border Background="#FFEBEE" 
+                                                        CornerRadius="4" 
+                                                        Padding="6,2" 
+                                                        Margin="8,0,0,0">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="🍅" 
+                                                                   FontSize="11" 
+                                                                   Margin="0,0,3,0"/>
+                                                        <TextBlock Text="{Binding CompletedPomodoros}" 
+                                                                   Foreground="#D32F2F" 
+                                                                   FontSize="11"/>
+                                                        <TextBlock Text="/" 
+                                                                   Foreground="#9E9E9E" 
+                                                                   FontSize="11"/>
+                                                        <TextBlock Text="{Binding EstimatedPomodoros}" 
+                                                                   Foreground="#9E9E9E" 
+                                                                   FontSize="11"/>
+                                                    </StackPanel>
+                                                </Border>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        
+                                        <!-- 优先级指示器 -->
+                                        <Border Grid.Column="2" 
+                                                Width="6" 
+                                                Height="Auto"
+                                                Background="{Binding Priority, Converter={StaticResource PriorityToColorConverter}}" 
+                                                HorizontalAlignment="Right" 
+                                                CornerRadius="3"
+                                                Margin="12,0,0,0"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        
+                        <!-- 添加待办事项 -->
+                        <Grid Grid.Row="2" Margin="15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Border Grid.Column="0" 
+                                    Background="White" 
+                                    CornerRadius="25" 
+                                    BorderThickness="1" 
+                                    BorderBrush="#E0E0E0">
+                                <TextBox Text="{Binding TodoViewModel.NewTodoTitle, UpdateSourceTrigger=PropertyChanged}" 
+                                         Padding="15,10" 
+                                         BorderThickness="0"
+                                         Background="Transparent"
+                                         FontSize="14"/>
+                            </Border>
+                            
+                            <Button Grid.Column="1" 
+                                    Content="添加" 
+                                    Command="{Binding TodoViewModel.AddTodoCommand}" 
+                                    Style="{StaticResource RoundButtonStyle}" 
+                                    Margin="10,0,0,0"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+                
+                <!-- 分隔线 -->
+                <GridSplitter Grid.Column="1" 
+                              Width="1" 
+                              HorizontalAlignment="Center" 
+                              VerticalAlignment="Stretch" 
+                              Background="#E0E0E0"
+                              Margin="15,0"/>
+                
+                <!-- 番茄钟区域 -->
+                <Border Grid.Column="2" 
+                        Background="#FAFAFA" 
+                        CornerRadius="12" 
+                        Effect="{StaticResource StandardShadow}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        
+                        <!-- 番茄钟标题 -->
+                        <Border Background="#FFEBEE" 
+                                CornerRadius="12,12,0,0" 
+                                Padding="15" 
+                                BorderThickness="0">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{StaticResource PomodoroIcon}" Width="24" Height="24" Margin="0,0,10,0"/>
+                                <TextBlock Text="番茄钟" 
+                                           FontSize="18" 
+                                           FontWeight="SemiBold" 
+                                           Foreground="#D32F2F"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- 番茄钟内容 -->
+                        <Grid x:Name="PomodoroPanel" Grid.Row="1" Margin="20">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- 当前状态 -->
+                            <Border Grid.Row="0" 
+                                    Background="#F5F5F5" 
+                                    CornerRadius="20" 
+                                    Padding="15,8" 
+                                    HorizontalAlignment="Center" 
+                                    Margin="0,0,0,20">
+                                <TextBlock Text="{Binding PomodoroViewModel.StateDisplay}" 
+                                           FontSize="16" 
+                                           FontWeight="SemiBold" 
+                                           Foreground="#424242"/>
+                            </Border>
+                            
+                            <!-- 计时器显示 -->
+                            <Grid Grid.Row="1">
+                                <Ellipse Width="240" 
+                                         Height="240" 
+                                         Fill="#FFEBEE" 
+                                         HorizontalAlignment="Center" 
+                                         VerticalAlignment="Center">
+                                    <Ellipse.Effect>
+                                        <DropShadowEffect Direction="270" 
+                                                          BlurRadius="15" 
+                                                          ShadowDepth="5" 
+                                                          Opacity="0.2" 
+                                                          Color="#000000"/>
+                                    </Ellipse.Effect>
+                                </Ellipse>
+                                
+                                <Ellipse Width="220" 
+                                         Height="220" 
+                                         Fill="White" 
+                                         HorizontalAlignment="Center" 
+                                         VerticalAlignment="Center"/>
+                                
+                                <TextBlock Text="{Binding PomodoroViewModel.TimeDisplay}" 
+                                           FontSize="60" 
+                                           FontWeight="Bold" 
+                                           Foreground="#D32F2F" 
+                                           HorizontalAlignment="Center" 
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+                            
+                            <!-- 番茄钟计数 -->
+                            <Border Grid.Row="2" 
+                                    Background="#F5F5F5" 
+                                    CornerRadius="20" 
+                                    Padding="15,8" 
+                                    HorizontalAlignment="Center" 
+                                    Margin="0,25,0,25">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="已完成番茄：" 
+                                               FontSize="14" 
+                                               Foreground="#424242"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding PomodoroViewModel.PomodoroCountDisplay}" 
+                                               FontSize="18" 
+                                               FontWeight="Bold" 
+                                               Foreground="#D32F2F" 
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- 控制按钮 -->
+                            <StackPanel Grid.Row="3" 
+                                        Orientation="Horizontal" 
+                                        HorizontalAlignment="Center">
+                                <Button Content="开始工作" 
+                                        Command="{Binding PomodoroViewModel.StartWorkCommand}" 
+                                        Style="{StaticResource PomodoroButtonStyle}" 
+                                        Background="#4CAF50" 
+                                        IsEnabled="{Binding PomodoroViewModel.CanStartWork}"/>
+                                
+                                <Button Content="暂停" 
+                                        Command="{Binding PomodoroViewModel.PauseCommand}" 
+                                        Style="{StaticResource PomodoroButtonStyle}" 
+                                        Background="#FFC107" 
+                                        IsEnabled="{Binding PomodoroViewModel.CanPause}"/>
+                                
+                                <Button Content="继续" 
+                                        Command="{Binding PomodoroViewModel.ResumeCommand}" 
+                                        Style="{StaticResource PomodoroButtonStyle}" 
+                                        Background="#2196F3" 
+                                        IsEnabled="{Binding PomodoroViewModel.CanResume}"/>
+                                
+                                <Button Content="重置" 
+                                        Command="{Binding PomodoroViewModel.ResetCommand}" 
+                                        Style="{StaticResource PomodoroButtonStyle}" 
+                                        Background="#F44336" 
+                                        IsEnabled="{Binding PomodoroViewModel.CanReset}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
