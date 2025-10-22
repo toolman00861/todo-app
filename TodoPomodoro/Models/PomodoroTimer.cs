@@ -206,5 +206,27 @@ namespace TodoPomodoro.Models
             RemainingSeconds = 0;
             TimerTick?.Invoke(this, EventArgs.Empty);
         }
+
+        /// <summary>
+        /// 更新计时器设置
+        /// </summary>
+        /// <param name="workDuration">工作时间（分钟）</param>
+        /// <param name="shortBreakDuration">短休息时间（分钟）</param>
+        /// <param name="longBreakDuration">长休息时间（分钟）</param>
+        /// <param name="pomodorosUntilLongBreak">几个番茄钟后进行长休息</param>
+        public void UpdateSettings(int workDuration, int shortBreakDuration, int longBreakDuration, int pomodorosUntilLongBreak)
+        {
+            WorkDuration = workDuration;
+            ShortBreakDuration = shortBreakDuration;
+            LongBreakDuration = longBreakDuration;
+            _pomodorosUntilLongBreak = pomodorosUntilLongBreak;
+            
+            // 如果当前处于Ready状态，更新显示时间
+            if (State == PomodoroState.Ready)
+            {
+                RemainingSeconds = WorkDuration * 60;
+                TimerTick?.Invoke(this, EventArgs.Empty);
+            }
+        }
     }
 }

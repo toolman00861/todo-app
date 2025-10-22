@@ -11,6 +11,7 @@ namespace TodoPomodoro.ViewModels
     {
         private TodoViewModel _todoViewModel;
         private PomodoroViewModel _pomodoroViewModel;
+        private SettingsViewModel _settingsViewModel;
 
         /// <summary>
         /// 待办事项视图模型
@@ -39,15 +40,32 @@ namespace TodoPomodoro.ViewModels
         }
 
         /// <summary>
+        /// 设置视图模型
+        /// </summary>
+        public SettingsViewModel SettingsViewModel
+        {
+            get => _settingsViewModel;
+            set
+            {
+                _settingsViewModel = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
         /// 构造函数
         /// </summary>
         public MainViewModel()
         {
             _todoViewModel = new TodoViewModel();
             _pomodoroViewModel = new PomodoroViewModel();
+            _settingsViewModel = new SettingsViewModel();
 
             // 关联待办事项和番茄钟
             _todoViewModel.PropertyChanged += TodoViewModel_PropertyChanged;
+
+            // 订阅设置变更事件
+            _settingsViewModel.SettingsChanged += OnSettingsChanged;
         }
 
         private void TodoViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -57,6 +75,19 @@ namespace TodoPomodoro.ViewModels
                 // 当选择待办事项时，将其关联到番茄钟
                 _pomodoroViewModel.Timer.CurrentTodoItem = _todoViewModel.SelectedTodoItem;
             }
+        }
+
+        /// <summary>
+        /// 处理设置变更
+        /// </summary>
+        private void OnSettingsChanged(object? sender, SettingsChangedEventArgs e)
+        {
+            _pomodoroViewModel.Timer.UpdateSettings(
+                e.WorkDuration,
+                e.ShortBreakDuration,
+                e.LongBreakDuration,
+                e.PomodorosUntilLongBreak
+            );
         }
 
         /// <summary>

@@ -186,47 +186,4 @@ namespace TodoPomodoro.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
-
-    /// <summary>
-    /// 命令实现类
-    /// </summary>
-    public class RelayCommand : ICommand
-    {
-        private readonly Action<object?> _execute;
-        private readonly Predicate<object?> _canExecute;
-
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        public RelayCommand(Action<object?> execute, Predicate<object?> canExecute = null)
-        {
-            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
-            _canExecute = canExecute;
-        }
-
-        /// <summary>
-        /// 判断命令是否可执行
-        /// </summary>
-        public bool CanExecute(object? parameter)
-        {
-            return _canExecute == null || _canExecute(parameter);
-        }
-
-        /// <summary>
-        /// 执行命令
-        /// </summary>
-        public void Execute(object? parameter)
-        {
-            _execute(parameter);
-        }
-
-        /// <summary>
-        /// 可执行状态变更事件
-        /// </summary>
-        public event EventHandler? CanExecuteChanged
-        {
-            add { CommandManager.RequerySuggested += value; }
-            remove { CommandManager.RequerySuggested -= value; }
-        }
-    }
 }
